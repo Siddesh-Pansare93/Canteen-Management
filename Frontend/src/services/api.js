@@ -139,3 +139,103 @@ export const getWalletBalance = async (uid) => {
     throw error;
   }
 };
+
+/**
+ * Create a new order
+ */
+export const createOrder = async (orderData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/orders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(orderData),
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to create order');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('API Error in createOrder:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get all orders with optional filters
+ * @param {Object} filters - { status, userId, limit }
+ */
+export const getOrders = async (filters = {}) => {
+  try {
+    const queryParams = new URLSearchParams();
+    
+    // Add filters to query parameters if they exist
+    if (filters.status) queryParams.append('status', filters.status);
+    if (filters.userId) queryParams.append('userId', filters.userId);
+    if (filters.limit) queryParams.append('limit', filters.limit);
+    
+    const response = await fetch(`${API_BASE_URL}/orders?${queryParams.toString()}`);
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch orders');
+    }
+    
+    return data.orders;
+  } catch (error) {
+    console.error('API Error in getOrders:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update order status
+ */
+export const updateOrderStatus = async (orderId, status) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/orders/${orderId}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status }),
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to update order status');
+    }
+    
+    return data.order;
+  } catch (error) {
+    console.error('API Error in updateOrderStatus:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get user's order history
+ */
+export const getUserOrders = async (uid) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/orders/user/${uid}`);
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch user orders');
+    }
+    
+    return data.orders;
+  } catch (error) {
+    console.error('API Error in getUserOrders:', error);
+    throw error;
+  }
+};

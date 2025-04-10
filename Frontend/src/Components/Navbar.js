@@ -82,7 +82,8 @@ const Navbar = () => {
               <NavLink to="/" label="Home" currentPath={location.pathname} />
               <NavLink to="/menu" label="Menu" currentPath={location.pathname} />
               <NavLink to="/seat" label="Seats" currentPath={location.pathname} />
-              {isAdmin && <NavLink to="/admin" label="Admin" currentPath={location.pathname} />}
+              {/* {isAdmin && <NavLink to="/admin" label="Admin" currentPath={location.pathname} />} */}
+              { <NavLink to="/admin" label="Admin" currentPath={location.pathname} />}
             </div>
           )}
 

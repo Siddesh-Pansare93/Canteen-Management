@@ -10,8 +10,9 @@ import ForgotPassword from "./Pages/ForgotPassword";
 import ChangePassword from "./Pages/ChangePassword";
 import Dashboard from "./Pages/Dashboard";
 import Settings from "./Pages/Settings"; // Add this import
-
 import Home from "./Pages/Home";
+import Orders from "./Pages/Orders"; // Add this import
+
 // Component imports
 import Navbar from "./Components/Navbar";
 import ProtectedRoute from "./Pages/ProtectedRoute";
@@ -63,11 +64,20 @@ function App() {
                 }
               />
               
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute>
+                    <Orders />
+                  </ProtectedRoute>
+                }
+              />
+              
               {/* Admin Routes */}
               <Route
                 path="/admin"
                 element={
-                  <ProtectedRoute adminOnly={true}>
+                  <ProtectedRoute adminOnly={false}>
                     <AdminDashboard />
                   </ProtectedRoute>
                 }

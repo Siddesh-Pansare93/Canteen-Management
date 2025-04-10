@@ -3,7 +3,9 @@ import mongoose from 'mongoose'
 
 const connectDb  = async() => {
     try {
-        const connectInstance = await mongoose.connect(`${process.env.mongodb_uri}/Canteen_Management`)
+        const connectInstance = await mongoose.connect(`${process.env.mongodb_uri}` , {
+            dbName : 'canteen'
+        })
         
         console.log(`Connected to the Mongodb at ${connectInstance.connection.host}`)
         

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../Pages/AuthContext";
 import { toast } from "react-toastify";
-import { processWalletPayment } from "../services/api";
+import { processWalletPayment, createOrder } from "../services/api";
 
 const CartPage = () => {
   const { cart, clearCart } = useCart();
@@ -29,8 +29,19 @@ const CartPage = () => {
 
     setLoading(true);
     try {
-      // Process payment through the API
-      const response = await processWalletPayment(user.uid, subtotal);
+      // Create an order in the database
+      const orderData = {
+        userId: user.uid,
+        items: cart.map(item => ({
+          itemId: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        totalAmount: subtotal
+      };
+      
+      const response = await createOrder(orderData);
       
       // Update local user state with new wallet balance
       login({

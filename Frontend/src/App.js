@@ -9,6 +9,7 @@ import Signup from "./Pages/SignUp";
 import ForgotPassword from "./Pages/ForgotPassword";
 import ChangePassword from "./Pages/ChangePassword";
 import Dashboard from "./Pages/Dashboard";
+import Settings from "./Pages/Settings"; // Add this import
 
 import Home from "./Pages/Home";
 // Component imports
@@ -49,6 +50,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <Settings />
                   </ProtectedRoute>
                 }
               />

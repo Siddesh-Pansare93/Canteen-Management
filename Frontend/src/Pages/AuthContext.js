@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../firebase'; // Adjust import path as needed
+import { auth } from '../firebase';
+import { getUserByUid } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -17,32 +18,50 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   });
+  const [loading, setLoading] = useState(true);
 
   // Derive these values from user state
   const isLoggedIn = !!user;
-  const isAdmin = user?.role === 'admin'; // Assuming role is stored in user object
+  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // If we have additional user data (like role) stored elsewhere, 
-        // we would fetch it here and combine with firebaseUser data
-        
-        const userData = {
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          displayName: firebaseUser.displayName || '',
-          // Use existing role if available or set default
-          role: user?.role || 'user', 
-          name: firebaseUser.displayName || user?.name || 'User'
-        };
-        
-        setUser(userData);
-        localStorage.setItem('user', JSON.stringify(userData));
+        try {
+          // Try to fetch additional user info from our backend
+          const backendUser = await getUserByUid(firebaseUser.uid).catch(() => null);
+          
+          const userData = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName || '',
+            // Use backend data if available, or existing/default values
+            role: backendUser?.role || user?.role || 'user',
+            name: backendUser?.displayName || firebaseUser.displayName || user?.name || 'User',
+            walletBalance: backendUser?.walletBalance || user?.walletBalance || 0,
+          };
+          
+          setUser(userData);
+          localStorage.setItem('user', JSON.stringify(userData));
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          // Fall back to just Firebase data
+          const userData = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName || '',
+            role: user?.role || 'user',
+            name: firebaseUser.displayName || user?.name || 'User'
+          };
+          
+          setUser(userData);
+          localStorage.setItem('user', JSON.stringify(userData));
+        }
       } else {
         setUser(null);
         localStorage.removeItem('user');
       }
+      setLoading(false);
     });
     
     return () => unsubscribe();
@@ -61,7 +80,7 @@ export const AuthProvider = ({ children }) => {
   };
   
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoggedIn, isAdmin }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoggedIn, isAdmin, loading }}>
       {children}
     </AuthContext.Provider>
   );

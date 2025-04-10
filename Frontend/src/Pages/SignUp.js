@@ -4,19 +4,39 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
+import { registerUser } from "../services/api";
+import { toast } from "react-toastify";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      // 1. Register with Firebase
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      
+      // 2. Register with our backend
+      await registerUser({
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        displayName: name || email.split('@')[0], // Use name or extract from email
+      });
+      
+      toast.success("Registration successful!");
       navigate("/");
     } catch (err) {
-      alert(err.message);
+      console.error("Signup error:", err);
+      toast.error(err.message || "Failed to register");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -30,6 +50,13 @@ const Signup = () => {
       >
         <h2 className="text-2xl font-bold text-[#2c2c5b] mb-6 text-center">Sign Up</h2>
         <form onSubmit={handleSignup} className="space-y-4">
+          <input
+            type="text"
+            placeholder="Full Name (optional)"
+            className="w-full px-4 py-3 border rounded focus:outline-none focus:ring-2 focus:ring-[#fec723]"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
           <input
             type="email"
             placeholder="Email"
@@ -48,9 +75,10 @@ const Signup = () => {
           />
           <button
             type="submit"
-            className="w-full bg-[#fec723] text-black font-semibold py-3 rounded hover:bg-yellow-400 transition"
+            className="w-full bg-[#fec723] text-black font-semibold py-3 rounded hover:bg-yellow-400 transition flex items-center justify-center"
+            disabled={loading}
           >
-            Sign Up
+            {loading ? "Creating Account..." : "Sign Up"}
           </button>
         </form>
         <p className="text-sm text-center mt-4 text-[#a3a3b2]">

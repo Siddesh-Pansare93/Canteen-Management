@@ -1,47 +1,51 @@
 import React from "react";
 import { Link } from "react-router-dom";
-
-// Dummy menu items data (replace with your actual data or context/state)
-const menuItems = [
-  { id: 1, name: "Veg Sandwich", price: 90 },
-  { id: 2, name: "Cheese Frankie", price: 90 },
-  { id: 3, name: "Cold Coffee", price: 90 },
-];
-
-// Sample cart items with only IDs and quantity
-const cartData = [
-  { id: 1, quantity: 1 },
-  { id: 2, quantity: 2 },
-];
+import { useCart } from "../context/CartContext";
+import { toast } from "react-toastify";
 
 const CartPage = () => {
-  const cartItems = cartData.map((cartItem) => {
-    const menuItem = menuItems.find((item) => item.id === cartItem.id);
-    return {
-      ...menuItem,
-      quantity: cartItem.quantity,
-      total: menuItem.price * cartItem.quantity,
-    };
-  });
+  const { cart, clearCart } = useCart();
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.total, 0);
-  const walletBalance = 1190;
+  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const walletBalance = 1190; // This could come from another context if you have wallet functionality
+
+  const handleCheckout = () => {
+    if (subtotal > walletBalance) {
+      toast.error("Insufficient wallet balance!");
+    } else {
+      toast.success("Order placed successfully!");
+      clearCart();
+    }
+  };
+
+  const handleClearCart = () => {
+    clearCart();
+    toast.info("Cart cleared");
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Your Cart</h2>
-      {cartItems.length === 0 ? (
-        <p className="text-gray-600">Your cart is empty.</p>
+      {cart.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-gray-600 mb-4">Your cart is empty.</p>
+          <Link 
+            to="/menu" 
+            className="bg-[#2c2c5b] text-white px-4 py-2 rounded hover:bg-[#fec723] hover:text-[#2c2c5b] transition"
+          >
+            Browse Menu
+          </Link>
+        </div>
       ) : (
         <div>
           <ul className="mb-4">
-            {cartItems.map((item) => (
+            {cart.map((item, index) => (
               <li
-                key={item.id}
+                key={index}
                 className="flex justify-between items-center border-b py-2"
               >
                 <span>{item.name} (x{item.quantity})</span>
-                <span>₹ {item.total.toFixed(2)}</span>
+                <span>₹ {(item.price * item.quantity).toFixed(2)}</span>
               </li>
             ))}
           </ul>
@@ -61,10 +65,16 @@ const CartPage = () => {
               <span>₹ {walletBalance.toFixed(2)}</span>
             </div>
             <div className="mt-4 flex gap-2">
-              <button className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+              <button 
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                onClick={handleClearCart}
+              >
                 Clear Cart
               </button>
-              <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+              <button 
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                onClick={handleCheckout}
+              >
                 Checkout
               </button>
             </div>

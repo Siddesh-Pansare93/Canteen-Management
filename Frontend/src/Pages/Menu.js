@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import MenuItems from "../Components/MenuItems";
+import { useCart } from "../context/CartContext";
+import { toast } from "react-toastify";
 
 const categories = ["All", ...new Set(MenuItems.map((item) => item.category))];
 
@@ -7,10 +9,13 @@ export default function Menu() {
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [searchTerm, setSearchTerm] = useState("");
     const [sortOption, setSortOption] = useState("default");
-    const [cart, setCart] = useState([]);
+    
+    // Use the cart context
+    const { cart, addToCart } = useCart();
 
     const handleAddToCart = (item) => {
-        setCart((prevCart) => [...prevCart, item]);
+        addToCart(item);
+        toast.success(`Added ${item.name} to cart!`);
     };
 
     const filteredItems = MenuItems
@@ -113,14 +118,14 @@ export default function Menu() {
                     <ul className="space-y-1 max-h-40 overflow-y-auto">
                         {cart.map((item, idx) => (
                             <li key={idx} className="text-sm text-[#2c2c5b]">
-                                {item.name} - ₹{item.price}
+                                {item.name} x{item.quantity} - ₹{item.price * item.quantity}
                             </li>
                         ))}
                     </ul>
                 )}
                 {cart.length > 0 && (
                     <div className="mt-2 text-right text-sm font-semibold">
-                        Total: ₹{cart.reduce((sum, i) => sum + i.price, 0)}
+                        Total: ₹{cart.reduce((sum, i) => sum + (i.price * i.quantity), 0)}
                     </div>
                 )}
             </div>

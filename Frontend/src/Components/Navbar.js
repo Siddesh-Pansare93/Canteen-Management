@@ -7,8 +7,9 @@ import {
 import { useAuth } from '../Pages/AuthContext'; // Adjust import path as needed
 import { auth } from '../firebase'; // Adjust import path as needed
 import { signOut } from 'firebase/auth';
+import { useCart } from '../context/CartContext'; // Import useCart
 
-const Navbar = ({ cartItemsCount = 0 }) => {
+const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const profileDropdownRef = useRef(null);
@@ -16,6 +17,10 @@ const Navbar = ({ cartItemsCount = 0 }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isLoggedIn, isAdmin, logout } = useAuth();
+  const { cart } = useCart(); // Get cart from context
+  
+  // Calculate cart items count
+  const cartItemsCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   // For debugging
   console.log('Auth state in Navbar:', { user, isLoggedIn, isAdmin });
@@ -85,7 +90,7 @@ const Navbar = ({ cartItemsCount = 0 }) => {
           <div className="flex items-center space-x-6">
             {isLoggedIn ? (
               <>
-                {/* Cart */}
+                {/* Cart - Now shows actual count from cart context */}
                 <Link to="/cart" className="text-[#a3a3b2] hover:text-[#fec723] p-2 rounded-full relative group transition-transform duration-200 hover:scale-110">
                   <FaShoppingCart className="text-xl" />
                   {cartItemsCount > 0 && (

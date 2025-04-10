@@ -45,7 +45,7 @@ const PopularItems = () => {
     <section className="py-8 px-4 bg-white">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-agnel-dark">Popular Items</h2>
-        <a href="#" className="text-purple-500 font-semibold hover:underline">
+        <a href="/menu" className="text-purple-500 font-semibold hover:underline">
           View All →
         </a>
       </div>

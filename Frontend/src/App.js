@@ -24,6 +24,7 @@ import CartPage from "./Pages/CartPage";
 import AdminDashboard from "./Pages/AdminDashboard";
 import Wallet from "./Pages/Wallet";
 import { CartProvider } from "./context/CartContext"; // Import CartProvider
+import MobileNav from "./Components/MobileNav"; // Add this import
 
 function App() {
   return (
@@ -32,7 +33,7 @@ function App() {
         <Router>
           <ToastContainer position="top-right" autoClose={3000} />
           <Navbar />
-          <div className="pt-16"> {/* Add padding to account for fixed navbar */}
+          <div className="pt-16 pb-16 md:pb-0"> {/* Add padding bottom for mobile nav */}
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Home />} />
@@ -85,6 +86,7 @@ function App() {
             </Routes>
             <Footer/>
           </div>
+          <MobileNav /> {/* Add mobile navigation bar */}
         </Router>
       </CartProvider>
     </AuthProvider>

@@ -150,6 +150,7 @@ const CartPage = () => {
   };
 
   const addSuggestedItemToCart = (item) => {
+    // Create a new cart item with all necessary properties
     const cartItem = {
       id: item.id,
       name: item.name,
@@ -158,8 +159,19 @@ const CartPage = () => {
       image: item.image
     };
     
-    // Use the addToCart function from context
-    updateQuantity(item.id, 1);
+    // Check if item is already in cart
+    const existingItem = cart.find(cartItem => cartItem.id === item.id);
+    
+    if (existingItem) {
+      // If item exists, update quantity
+      updateQuantity(item.id, existingItem.quantity + 1);
+    } else {
+      // If item doesn't exist yet, we need to add it to cart context
+      // Since there's no direct addToCart function, we'll need to add this to CartContext
+      // For now, use updateQuantity which should handle new items
+      updateQuantity(item.id, 1, cartItem); // Pass the full item data as third parameter
+    }
+    
     toast.success(`Added ${item.name} to cart!`);
     
     // Update suggestions

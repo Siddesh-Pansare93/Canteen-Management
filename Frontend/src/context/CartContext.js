@@ -38,17 +38,35 @@ export const CartProvider = ({ children }) => {
     setCart(prevCart => prevCart.filter(item => item.id !== itemId));
   };
 
-  const updateQuantity = (itemId, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(itemId);
-      return;
-    }
-    
-    setCart(prevCart => 
-      prevCart.map(item => 
-        item.id === itemId ? { ...item, quantity } : item
-      )
-    );
+  const updateQuantity = (itemId, quantity, itemData = null) => {
+    setCart(prevCart => {
+      // Check if item exists in cart
+      const itemIndex = prevCart.findIndex(item => item.id === itemId);
+      
+      // If item exists, update its quantity
+      if (itemIndex >= 0) {
+        const updatedCart = [...prevCart];
+        updatedCart[itemIndex] = {
+          ...updatedCart[itemIndex],
+          quantity: quantity
+        };
+        localStorage.setItem('cart', JSON.stringify(updatedCart));
+        return updatedCart;
+      } 
+      // If item doesn't exist but we have itemData, add it as new
+      else if (itemData) {
+        const newItem = {
+          ...itemData,
+          quantity: quantity
+        };
+        const updatedCart = [...prevCart, newItem];
+        localStorage.setItem('cart', JSON.stringify(updatedCart));
+        return updatedCart;
+      }
+      
+      // If neither condition is met, return cart unchanged
+      return prevCart;
+    });
   };
 
   const clearCart = () => setCart([]);

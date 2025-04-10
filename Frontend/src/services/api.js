@@ -67,3 +67,75 @@ export const deleteUserFromDb = async (uid) => {
     throw error;
   }
 };
+
+/**
+ * Add funds to user's wallet
+ */
+export const addFundsToWallet = async (uid, amount) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/wallet/add`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ uid, amount }),
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to add funds to wallet');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('API Error in addFundsToWallet:', error);
+    throw error;
+  }
+};
+
+/**
+ * Process a payment by deducting funds from user's wallet
+ */
+export const processWalletPayment = async (uid, amount) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/wallet/deduct`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ uid, amount }),
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Payment failed');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('API Error in processWalletPayment:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get user's current wallet balance
+ */
+export const getWalletBalance = async (uid) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/wallet/${uid}`);
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch wallet balance');
+    }
+    
+    return data.walletBalance;
+  } catch (error) {
+    console.error('API Error in getWalletBalance:', error);
+    throw error;
+  }
+};

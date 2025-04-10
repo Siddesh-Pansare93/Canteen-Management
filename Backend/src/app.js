@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes.js';
+import walletRoutes from './routes/wallet.routes.js';
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/wallet', walletRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {

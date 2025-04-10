@@ -1,25 +1,90 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "./AuthContext";
+import { addFundsToWallet, getWalletBalance } from "../services/api";
+import { toast } from "react-toastify";
 
 const Wallet = () => {
-  const [balance, setBalance] = useState(250);
+  const { user, login } = useAuth();
+  const [balance, setBalance] = useState(user?.walletBalance || 0);
   const [amount, setAmount] = useState("");
-  const [transactions, setTransactions] = useState([
+  const [loading, setLoading] = useState(false);
+  const [transactions, setTransactions] = useState([]);
+  const [showDefaultTransactions, setShowDefaultTransactions] = useState(true);
+
+  // Fetch current balance when component mounts
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (user?.uid) {
+        try {
+          const currentBalance = await getWalletBalance(user.uid);
+          setBalance(currentBalance);
+          
+          // Update user context with latest balance
+          login({
+            ...user,
+            walletBalance: currentBalance
+          });
+        } catch (error) {
+          console.error("Failed to fetch wallet balance:", error);
+        }
+      }
+    };
+    
+    fetchBalance();
+  }, [user?.uid]);
+
+  const handleAddFunds = async () => {
+    const amt = parseFloat(amount);
+    if (!amt || amt <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await addFundsToWallet(user.uid, amt);
+      
+      // Update balance state and user context
+      setBalance(response.walletBalance);
+      login({
+        ...user,
+        walletBalance: response.walletBalance
+      });
+      
+      // Add transaction to list
+      const newTransaction = { 
+        type: "Wallet Recharge", 
+        time: "Just now", 
+        amount: amt 
+      };
+      
+      if (showDefaultTransactions) {
+        // First real transaction - replace defaults with this one
+        setTransactions([newTransaction]);
+        setShowDefaultTransactions(false);
+      } else {
+        // Add to existing transactions
+        setTransactions([newTransaction, ...transactions]);
+      }
+      
+      toast.success(`₹${amt} added to your wallet successfully!`);
+      setAmount("");
+    } catch (error) {
+      toast.error(error.message || "Failed to add funds");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Default transactions to show initially
+  const defaultTransactions = [
     { type: "Wallet Recharge", time: "Today, 2:30 PM", amount: 100 },
     { type: "Order #order-2", time: "Yesterday, 1:15 PM", amount: -140 },
     { type: "Wallet Recharge", time: "2 days ago, 11:05 AM", amount: 200 },
-  ]);
+  ];
 
-  const handleAddFunds = () => {
-    const amt = parseFloat(amount);
-    if (!amt || amt <= 0) return alert("Enter valid amount");
-
-    setBalance(prev => prev + amt);
-    setTransactions([
-      { type: "Wallet Recharge", time: "Just now", amount: amt },
-      ...transactions.slice(0, 2),
-    ]);
-    setAmount("");
-  };
+  // Display either actual transactions or default ones
+  const displayTransactions = showDefaultTransactions ? defaultTransactions : transactions;
 
   return (
     <div className="max-w-5xl mx-auto mt-10 p-6">
@@ -43,7 +108,7 @@ const Wallet = () => {
               Recent Transactions
             </h2>
             <ul className="space-y-4 text-[#2c2c5b]">
-              {transactions.map((tx, i) => (
+              {displayTransactions.map((tx, i) => (
                 <li
                   key={i}
                   className="flex justify-between items-center border-b pb-2"
@@ -63,7 +128,7 @@ const Wallet = () => {
               ))}
             </ul>
             <p className="text-sm text-[#a3a3b2] mt-4">
-              Displaying last {transactions.length} transactions
+              Displaying last {displayTransactions.length} transactions
             </p>
           </div>
         </div>
@@ -82,6 +147,7 @@ const Wallet = () => {
             onChange={(e) => setAmount(e.target.value)}
             className="w-full border p-2 rounded mb-3"
             placeholder="Enter amount"
+            disabled={loading}
           />
           <div className="flex gap-2 mb-4">
             {[100, 200, 500].map((val) => (
@@ -89,6 +155,7 @@ const Wallet = () => {
                 key={val}
                 onClick={() => setAmount(val)}
                 className="border px-3 py-1 rounded hover:bg-[#fec723] hover:text-[#2c2c5b]"
+                disabled={loading}
               >
                 ₹{val}
               </button>
@@ -102,9 +169,10 @@ const Wallet = () => {
           </div>
           <button
             onClick={handleAddFunds}
-            className="w-full bg-[#fec723] text-[#2c2c5b] font-semibold py-2 rounded hover:bg-[#ffd744]"
+            className={`w-full ${loading ? 'bg-gray-400' : 'bg-[#fec723] hover:bg-[#ffd744]'} text-[#2c2c5b] font-semibold py-2 rounded`}
+            disabled={loading}
           >
-            + Add Funds
+            {loading ? "Processing..." : "+ Add Funds"}
           </button>
         </div>
       </div>

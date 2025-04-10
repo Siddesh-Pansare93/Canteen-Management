@@ -1,20 +1,50 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../Pages/AuthContext";
 import { toast } from "react-toastify";
+import { processWalletPayment } from "../services/api";
 
 const CartPage = () => {
   const { cart, clearCart } = useCart();
+  const { user, login } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const walletBalance = 1190; // This could come from another context if you have wallet functionality
+  const walletBalance = user?.walletBalance || 0;
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
+    if (!user?.uid) {
+      toast.error("Please log in to complete your purchase");
+      navigate("/login");
+      return;
+    }
+
     if (subtotal > walletBalance) {
-      toast.error("Insufficient wallet balance!");
-    } else {
+      toast.error("Insufficient wallet balance! Please add funds to your wallet.");
+      navigate("/wallet");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Process payment through the API
+      const response = await processWalletPayment(user.uid, subtotal);
+      
+      // Update local user state with new wallet balance
+      login({
+        ...user,
+        walletBalance: response.walletBalance
+      });
+      
       toast.success("Order placed successfully!");
       clearCart();
+      navigate("/");
+    } catch (error) {
+      toast.error(error.message || "Failed to process payment");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,14 +98,16 @@ const CartPage = () => {
               <button 
                 className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
                 onClick={handleClearCart}
+                disabled={loading}
               >
                 Clear Cart
               </button>
               <button 
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                className={`${loading ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'} text-white px-4 py-2 rounded`}
                 onClick={handleCheckout}
+                disabled={loading}
               >
-                Checkout
+                {loading ? "Processing..." : "Checkout"}
               </button>
             </div>
           </div>

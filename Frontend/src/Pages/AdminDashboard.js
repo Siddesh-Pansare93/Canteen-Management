@@ -3,7 +3,7 @@ import { getOrders, updateOrderStatus } from "../services/api";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import { 
-  FiRefreshCw, FiClock, FiAlertCircle, FiCheckCircle, 
+  FiRefreshCw, FiClock, FiCheckCircle, 
   FiTruck, FiShoppingBag, FiFilter, FiSearch, FiX 
 } from "react-icons/fi";
 
@@ -23,7 +23,6 @@ const AdminDashboard = () => {
       case 'preparing': return 'Preparing';
       case 'ready': return 'Ready';
       case 'completed': return 'Completed';
-      case 'cancelled': return 'Cancelled';
       default: return null;
     }
   };
@@ -92,7 +91,6 @@ const AdminDashboard = () => {
       case 'Preparing': return 'bg-[#fec723] text-[#2c2c5b]';
       case 'Ready': return 'bg-green-100 text-green-700';
       case 'Completed': return 'bg-gray-100 text-gray-800';
-      case 'Cancelled': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -103,7 +101,6 @@ const AdminDashboard = () => {
       case 'Preparing': return <FiTruck className="animate-pulse" />;
       case 'Ready': return <FiShoppingBag className="text-green-600" />;
       case 'Completed': return <FiCheckCircle className="text-blue-600" />;
-      case 'Cancelled': return <FiAlertCircle className="text-red-600" />;
       default: return <FiClock />;
     }
   };
@@ -113,7 +110,6 @@ const AdminDashboard = () => {
   const preparingOrders = allOrders.filter(o => o.status === 'Preparing').length;
   const readyOrders = allOrders.filter(o => o.status === 'Ready').length;
   const completedOrders = allOrders.filter(o => o.status === 'Completed').length;
-  const cancelledOrders = allOrders.filter(o => o.status === 'Cancelled').length;
 
   const displayedOrders = isSearching ? searchResults : filteredOrders;
 
@@ -126,14 +122,13 @@ const AdminDashboard = () => {
     >
       <h1 className="text-3xl font-bold text-[#2c2c5b] mb-6">Order Management Dashboard</h1>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8">
         {[
           { label: "Total Orders", value: totalOrders, color: "bg-gray-100", icon: "📊", onClick: () => setActiveFilter('all') },
           { label: "Pending", value: pendingOrders, color: "bg-yellow-100", icon: "⏱️", onClick: () => setActiveFilter('pending') },
           { label: "Preparing", value: preparingOrders, color: "bg-[#fef5d6]", icon: "👨‍🍳", onClick: () => setActiveFilter('preparing') },
           { label: "Ready", value: readyOrders, color: "bg-green-100", icon: "✅", onClick: () => setActiveFilter('ready') },
           { label: "Completed", value: completedOrders, color: "bg-blue-100", icon: "🏁", onClick: () => setActiveFilter('completed') },
-          { label: "Cancelled", value: cancelledOrders, color: "bg-red-100", icon: "❌", onClick: () => setActiveFilter('cancelled') },
         ].map((stat, idx) => (
           <motion.button
             key={idx}
@@ -183,12 +178,6 @@ const AdminDashboard = () => {
               onClick={() => setActiveFilter('completed')}
             >
               Completed
-            </button>
-            <button
-              className={`px-3 py-1 mr-2 rounded-full text-sm ${activeFilter === 'cancelled' ? 'bg-red-100 text-red-600 font-medium' : 'bg-gray-100'}`}
-              onClick={() => setActiveFilter('cancelled')}
-            >
-              Cancelled
             </button>
             <button
               className={`px-3 py-1 mr-2 rounded-full text-sm ${activeFilter === 'all' ? 'bg-purple-100 text-purple-600 font-medium' : 'bg-gray-100'}`}
@@ -296,13 +285,11 @@ const AdminDashboard = () => {
                 {activeFilter === 'preparing' && <FiTruck className="mr-2 text-amber-500" />}
                 {activeFilter === 'ready' && <FiShoppingBag className="mr-2 text-green-500" />}
                 {activeFilter === 'completed' && <FiCheckCircle className="mr-2 text-blue-500" />}
-                {activeFilter === 'cancelled' && <FiAlertCircle className="mr-2 text-red-500" />}
                 {activeFilter === 'all' && "All Orders"}
                 {activeFilter === 'pending' && "Pending Orders"}
                 {activeFilter === 'preparing' && "Orders Being Prepared"}
                 {activeFilter === 'ready' && "Orders Ready for Pickup"}
                 {activeFilter === 'completed' && "Completed Orders"}
-                {activeFilter === 'cancelled' && "Cancelled Orders"}
               </>
             )}
             <span className="ml-2 text-base font-normal text-gray-500">
@@ -389,24 +376,14 @@ const AdminDashboard = () => {
                     )}
 
                     {order.status === 'Preparing' && (
-                      <>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200"
-                          onClick={() => handleUpdateStatus(order._id, "Ready")}
-                        >
-                          Mark Ready
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="text-xs bg-red-100 text-red-500 px-2 py-1 rounded hover:bg-red-200"
-                          onClick={() => handleUpdateStatus(order._id, "Cancelled")}
-                        >
-                          Cancel
-                        </motion.button>
-                      </>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200"
+                        onClick={() => handleUpdateStatus(order._id, "Ready")}
+                      >
+                        Mark Ready
+                      </motion.button>
                     )}
 
                     {order.status === 'Ready' && (
@@ -420,7 +397,7 @@ const AdminDashboard = () => {
                       </motion.button>
                     )}
                     
-                    {(order.status === 'Completed' || order.status === 'Cancelled') && (
+                    {(order.status === 'Completed') && (
                       <span className="text-xs text-gray-500">No actions available</span>
                     )}
                   </div>
@@ -477,20 +454,12 @@ const AdminDashboard = () => {
                       )}
 
                       {order.status === 'Preparing' && (
-                        <>
-                          <button
-                            className="text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-full hover:bg-green-200 flex-1"
-                            onClick={() => handleUpdateStatus(order._id, "Ready")}
-                          >
-                            Mark Ready
-                          </button>
-                          <button
-                            className="text-xs bg-red-100 text-red-500 px-3 py-1.5 rounded-full hover:bg-red-200 flex-1"
-                            onClick={() => handleUpdateStatus(order._id, "Cancelled")}
-                          >
-                            Cancel
-                          </button>
-                        </>
+                        <button
+                          className="text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-full hover:bg-green-200 flex-1"
+                          onClick={() => handleUpdateStatus(order._id, "Ready")}
+                        >
+                          Mark Ready
+                        </button>
                       )}
 
                       {order.status === 'Ready' && (
@@ -502,7 +471,7 @@ const AdminDashboard = () => {
                         </button>
                       )}
                       
-                      {(order.status === 'Completed' || order.status === 'Cancelled') && (
+                      {(order.status === 'Completed') && (
                         <span className="text-xs text-gray-500 py-1">No actions available</span>
                       )}
                     </div>

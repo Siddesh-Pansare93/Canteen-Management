@@ -13,13 +13,16 @@ const Orders = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'active', 'completed'
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (showToast = false) => {
     if (user?.uid) {
       try {
         setRefreshing(true);
         const userOrders = await getUserOrders(user.uid);
         setOrders(userOrders);
-        toast.success("Orders refreshed successfully");
+        // Only show toast for manual refreshes
+        if (showToast) {
+          toast.success("Orders refreshed successfully");
+        }
       } catch (error) {
         console.error("Failed to fetch orders:", error);
         toast.error("Could not load your orders");
@@ -31,7 +34,7 @@ const Orders = () => {
   };
 
   useEffect(() => {
-    fetchOrders();
+    fetchOrders(false); // Pass false for automatic fetch on mount
   }, [user?.uid]);
 
   const getStatusBadgeClass = (status) => {
@@ -40,7 +43,6 @@ const Orders = () => {
       case 'Preparing': return 'bg-[#fec723] text-[#2c2c5b] border-amber-400';
       case 'Ready': return 'bg-green-100 text-green-800 border-green-300';
       case 'Completed': return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'Cancelled': return 'bg-red-100 text-red-800 border-red-300';
       default: return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
@@ -100,7 +102,7 @@ const Orders = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-[#2c2c5b]">My Orders</h1>
         <button 
-          onClick={fetchOrders} 
+          onClick={() => fetchOrders(true)} // Pass true for manual refresh button clicks
           disabled={refreshing}
           className="flex items-center gap-2 bg-[#2c2c5b] text-white px-4 py-2 rounded-full hover:bg-[#3a3a77] transition-all disabled:bg-gray-400"
         >

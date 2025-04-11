@@ -3,6 +3,7 @@ import cors from 'cors';
 import authRoutes from './routes/auth.routes.js';
 import walletRoutes from './routes/wallet.routes.js';
 import orderRoutes from './routes/order.routes.js';
+import seatRoutes from './routes/seat.routes.js';
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/seats', seatRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {

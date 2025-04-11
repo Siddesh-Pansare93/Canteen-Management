@@ -239,3 +239,23 @@ export const getUserOrders = async (uid) => {
     throw error;
   }
 };
+
+/**
+ * Get latest seat availability data
+ */
+export const getSeatAvailability = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/seats`);
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch seat data');
+    }
+    
+    return data.data;
+  } catch (error) {
+    console.error('API Error in getSeatAvailability:', error);
+    throw error;
+  }
+};

@@ -40,49 +40,55 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/change-password" element={<ChangePassword />} />
-              <Route path="/seat" element={<Seats />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/menu" element={<Menu />} />
-              <Route path="/wallet" element={<Wallet />} />
-
-              {/* Protected Routes */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
               
-              <Route
-                path="/settings"
-                element={
-                  <ProtectedRoute>
-                    <Settings />
-                  </ProtectedRoute>
-                }
-              />
-              
-              <Route
-                path="/orders"
-                element={
-                  <ProtectedRoute>
-                    <Orders />
-                  </ProtectedRoute>
-                }
-              />
+              {/* Protected Routes - All routes that require authentication */}
+              <Route path="/change-password" element={
+                <ProtectedRoute>
+                  <ChangePassword />
+                </ProtectedRoute>
+              } />
+              <Route path="/seat" element={
+                <ProtectedRoute>
+                  <Seats />
+                </ProtectedRoute>
+              } />
+              <Route path="/cart" element={
+                <ProtectedRoute>
+                  <CartPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/menu" element={
+                <ProtectedRoute>
+                  <Menu />
+                </ProtectedRoute>
+              } />
+              <Route path="/wallet" element={
+                <ProtectedRoute>
+                  <Wallet />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/settings" element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              } />
+              <Route path="/orders" element={
+                <ProtectedRoute>
+                  <Orders />
+                </ProtectedRoute>
+              } />
               
               {/* Admin Routes */}
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute adminOnly={true}>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/admin" element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
             </Routes>
             <Footer/>
           </div>

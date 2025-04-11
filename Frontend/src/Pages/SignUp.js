@@ -18,23 +18,32 @@ const Signup = () => {
     e.preventDefault();
     setLoading(true);
     
+    let firebaseUser = null;
+    
     try {
       // 1. Register with Firebase
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const firebaseUser = userCredential.user;
+      firebaseUser = userCredential.user;
       
-      // 2. Register with our backend
-      await registerUser({
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-        displayName: name || email.split('@')[0], // Use name or extract from email
-      });
-      
-      toast.success("Registration successful!");
-      navigate("/");
-    } catch (err) {
-      console.error("Signup error:", err);
-      toast.error(err.message || "Failed to register");
+      try {
+        // 2. Register with our backend
+        await registerUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: name || email.split('@')[0], // Use name or extract from email
+        });
+        
+        toast.success("Registration successful!");
+        navigate("/");
+      } catch (dbError) {
+        // If database registration fails, delete the Firebase user
+        console.error("Database registration error:", dbError);
+        await firebaseUser.delete();
+        toast.error("Registration failed: " + (dbError.message || "Could not create account in database"));
+      }
+    } catch (firebaseError) {
+      console.error("Firebase signup error:", firebaseError);
+      toast.error(firebaseError.message || "Failed to register");
     } finally {
       setLoading(false);
     }

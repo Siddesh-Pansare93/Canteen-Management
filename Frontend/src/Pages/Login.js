@@ -1,23 +1,42 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"; // 🔥 import navigate hook
 import { auth } from "../firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { motion } from "framer-motion";
 import LoginBanner from "../Components/LoginBanner";
+import { getUserByUid } from "../services/api";
+import { toast } from "react-toastify";
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false); // Added loading state
     const navigate = useNavigate(); // 🔥 initialize navigate
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        setLoading(true); // Assuming you have a loading state
+        
         try {
-            await signInWithEmailAndPassword(auth, email, password);
-            alert("Login successful!");
-            navigate("/"); // 🔥 redirect to homepage
+            // 1. Firebase authentication
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const firebaseUser = userCredential.user;
+            
+            try {
+                // 2. Check if user exists in our database
+                await getUserByUid(firebaseUser.uid);
+                // If we get here, the user exists in the database
+                toast.success("Login successful!");
+                navigate("/"); // Redirect to homepage
+            } catch (dbError) {
+                // If user is not found in our database, log them out of Firebase
+                await signOut(auth);
+                toast.error("Account not found in database. Please contact support.");
+            }
         } catch (err) {
-            alert(err.message);
+            toast.error(err.message || "Login failed");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -67,8 +86,9 @@ export default function Login() {
                     <button
                         type="submit"
                         className="w-full bg-[#2c2c5b] text-white font-semibold py-2 rounded-full hover:bg-[#fec723] hover:text-[#2c2c5b] transition"
+                        disabled={loading} // Disable button while loading
                     >
-                        LOGIN
+                        {loading ? "Logging in..." : "LOGIN"} {/* Show loading text */}
                     </button>
                 </form>
                 <p className="text-center text-[#2c2c5b] mt-4">

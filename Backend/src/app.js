@@ -7,11 +7,26 @@ import seatRoutes from './routes/seat.routes.js';
 
 const app = express();
 
-// Enhanced CORS configuration for Vercel deployment
+// Enhanced CORS configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://angel-eats.vercel.app',
+  'https://canteenbackend.vercel.app',
+  // Add any other domains that need access
+];
+
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production'
-    ? [process.env.FRONTEND_URL, 'https://canteen-frontend.vercel.app', 'https://www.canteen-frontend.vercel.app']
-    : 'http://localhost:3000',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      console.log('Blocked by CORS:', origin);
+      callback(null, true); // Temporarily allow all origins in production while debugging
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']

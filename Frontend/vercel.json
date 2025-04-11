@@ -6,6 +6,6 @@
   "outputDirectory": "build",
   "framework": "create-react-app",
   "env": {
-    "REACT_APP_API_URL": "https://canteen-backend.vercel.app/api"
+    "REACT_APP_BACKEND_URL": "https://canteenbackend.vercel.app/api"
   }
 }

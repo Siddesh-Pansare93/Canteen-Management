@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000/api';
 
 /**
  * Register a new user in the backend after Firebase registration

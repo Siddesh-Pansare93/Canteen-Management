@@ -11,7 +11,7 @@ export default function Menu() {
     const [sortOption, setSortOption] = useState("default");
     
     // Use the cart context
-    const { cart, addToCart } = useCart();
+    const { addToCart } = useCart();
 
     const handleAddToCart = (item) => {
         addToCart(item);
@@ -107,27 +107,6 @@ export default function Menu() {
                         </div>
                     </div>
                 ))}
-            </div>
-
-            {/* Cart Summary */}
-            <div className="fixed bottom-4 right-4 bg-white rounded-2xl shadow-xl p-4 w-64 z-50">
-                <h3 className="text-lg font-bold text-[#2c2c5b] mb-2">🛒 Cart</h3>
-                {cart.length === 0 ? (
-                    <p className="text-gray-500">Your cart is empty</p>
-                ) : (
-                    <ul className="space-y-1 max-h-40 overflow-y-auto">
-                        {cart.map((item, idx) => (
-                            <li key={idx} className="text-sm text-[#2c2c5b]">
-                                {item.name} x{item.quantity} - ₹{item.price * item.quantity}
-                            </li>
-                        ))}
-                    </ul>
-                )}
-                {cart.length > 0 && (
-                    <div className="mt-2 text-right text-sm font-semibold">
-                        Total: ₹{cart.reduce((sum, i) => sum + (i.price * i.quantity), 0)}
-                    </div>
-                )}
             </div>
         </div>
     );

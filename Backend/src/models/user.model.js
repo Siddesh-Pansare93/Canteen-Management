@@ -22,6 +22,11 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user',
   },
+  userType: {
+    type: String,
+    enum: ['teacher', 'student'],
+    required: true,
+  },
   walletBalance: {
     type: Number,
     default: 0,

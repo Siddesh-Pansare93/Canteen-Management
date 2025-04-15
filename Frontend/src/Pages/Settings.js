@@ -47,6 +47,10 @@ const Settings = () => {
                 <span>{user?.displayName || user?.name || 'Not set'}</span>
               </div>
               <div className="flex flex-col md:flex-row md:items-center">
+                <span className="w-32 text-gray-600 font-medium">User Type:</span>
+                <span className="capitalize">{user?.userType || 'Student'}</span>
+              </div>
+              <div className="flex flex-col md:flex-row md:items-center">
                 <span className="w-32 text-gray-600 font-medium">Role:</span>
                 <span className="capitalize">{user?.role || 'User'}</span>
               </div>

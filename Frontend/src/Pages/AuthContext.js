@@ -39,6 +39,7 @@ export const AuthProvider = ({ children }) => {
             role: backendUser?.role || user?.role || 'user',
             name: backendUser?.displayName || firebaseUser.displayName || user?.name || 'User',
             walletBalance: backendUser?.walletBalance || user?.walletBalance || 0,
+            userType: backendUser?.userType || user?.userType || 'student',
           };
           
           setUser(userData);
@@ -51,7 +52,8 @@ export const AuthProvider = ({ children }) => {
             email: firebaseUser.email,
             displayName: firebaseUser.displayName || '',
             role: user?.role || 'user',
-            name: firebaseUser.displayName || user?.name || 'User'
+            name: firebaseUser.displayName || user?.name || 'User',
+            userType: user?.userType || 'student',
           };
           
           setUser(userData);

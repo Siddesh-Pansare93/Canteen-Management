@@ -5,7 +5,7 @@ import User from '../models/user.model.js';
  */
 export const registerUser = async (req, res) => {
   try {
-    const { uid, email, displayName = '', role = 'user' } = req.body;
+    const { uid, email, displayName = '', role = 'user', userType = 'student' } = req.body;
 
     // Validate required fields
     if (!uid || !email) {
@@ -30,6 +30,7 @@ export const registerUser = async (req, res) => {
       email,
       displayName,
       role,
+      userType, // Include userType field
       walletBalance: 250, // Starting amount for new users
     });
 

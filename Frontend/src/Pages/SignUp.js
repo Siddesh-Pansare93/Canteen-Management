@@ -11,6 +11,7 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [userType, setUserType] = useState("student"); // Default to student
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -31,6 +32,7 @@ const Signup = () => {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           displayName: name || email.split('@')[0], // Use name or extract from email
+          userType: userType // Include user type
         });
         
         toast.success("Registration successful!");
@@ -82,6 +84,36 @@ const Signup = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          
+          {/* User Type Selection */}
+          <div className="w-full">
+            <label className="block text-gray-600 mb-1">I am a:</label>
+            <div className="flex gap-4">
+              <label className="flex items-center p-3 border rounded-lg flex-1 cursor-pointer transition-all hover:bg-gray-50">
+                <input
+                  type="radio"
+                  name="userType"
+                  value="student"
+                  checked={userType === "student"}
+                  onChange={() => setUserType("student")}
+                  className="mr-2"
+                />
+                <span>Student</span>
+              </label>
+              <label className="flex items-center p-3 border rounded-lg flex-1 cursor-pointer transition-all hover:bg-gray-50">
+                <input
+                  type="radio"
+                  name="userType"
+                  value="teacher"
+                  checked={userType === "teacher"}
+                  onChange={() => setUserType("teacher")}
+                  className="mr-2"
+                />
+                <span>Teacher</span>
+              </label>
+            </div>
+          </div>
+          
           <button
             type="submit"
             className="w-full bg-[#fec723] text-black font-semibold py-3 rounded hover:bg-yellow-400 transition flex items-center justify-center"

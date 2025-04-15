@@ -80,10 +80,27 @@ export const getOrders = async (req, res) => {
       .sort({ createdAt: -1 }) // Most recent first
       .limit(req.query.limit ? parseInt(req.query.limit) : 100);
     
+    // Enhance orders with userType information
+    const enhancedOrders = await Promise.all(orders.map(async (order) => {
+      const orderObj = order.toObject();
+      
+      // Find user to get userType
+      const user = await User.findOne({ uid: order.userId });
+      
+      // Add userType to order object
+      if (user && user.userType) {
+        orderObj.userType = user.userType;
+      } else {
+        orderObj.userType = 'student'; // Default to student if not found
+      }
+      
+      return orderObj;
+    }));
+    
     return res.status(200).json({
       success: true,
-      count: orders.length,
-      orders
+      count: enhancedOrders.length,
+      orders: enhancedOrders
     });
     
   } catch (error) {

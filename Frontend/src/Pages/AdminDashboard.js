@@ -4,7 +4,8 @@ import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import { 
   FiRefreshCw, FiClock, FiCheckCircle, 
-  FiTruck, FiShoppingBag, FiFilter, FiSearch, FiX 
+  FiTruck, FiShoppingBag, FiFilter, FiSearch, FiX,
+  FiStar // Added star icon for important orders
 } from "react-icons/fi";
 
 const AdminDashboard = () => {
@@ -32,13 +33,20 @@ const AdminDashboard = () => {
       try {
         setLoading(true);
         const allOrdersResponse = await getOrders();
-        setAllOrders(allOrdersResponse);
+
+        console.log(allOrdersResponse)
+        
+        // Sort orders so teacher orders appear first
+        const sortedOrders = sortOrdersByUserType(allOrdersResponse);
+        setAllOrders(sortedOrders);
+        
         if (activeFilter !== 'all') {
           const status = getStatusFromFilter(activeFilter);
           const filteredResponse = await getOrders({ status });
-          setFilteredOrders(filteredResponse);
+          // Sort filtered orders as well
+          setFilteredOrders(sortOrdersByUserType(filteredResponse));
         } else {
-          setFilteredOrders(allOrdersResponse);
+          setFilteredOrders(sortedOrders);
         }
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -49,6 +57,18 @@ const AdminDashboard = () => {
     };
     fetchOrders();
   }, [activeFilter, refreshTrigger]);
+
+  // Sort function to prioritize teacher orders
+  const sortOrdersByUserType = (orders) => {
+    return [...orders].sort((a, b) => {
+      // If a is from a teacher and b is not, a comes first
+      if (a.userType === 'teacher' && b.userType !== 'teacher') return -1;
+      // If b is from a teacher and a is not, b comes first
+      if (b.userType === 'teacher' && a.userType !== 'teacher') return 1;
+      // Otherwise maintain the original order (usually by date)
+      return 0;
+    });
+  };
 
   useEffect(() => {
     if (searchTerm.trim() === "") {
@@ -63,7 +83,8 @@ const AdminDashboard = () => {
       order.customerEmail.toLowerCase().includes(lowercasedSearch) ||
       order.items.some(item => item.name.toLowerCase().includes(lowercasedSearch))
     );
-    setSearchResults(results);
+    // Sort search results to prioritize teacher orders
+    setSearchResults(sortOrdersByUserType(results));
   }, [searchTerm, allOrders]);
 
   const handleUpdateStatus = async (orderId, newStatus) => {
@@ -112,6 +133,11 @@ const AdminDashboard = () => {
   const completedOrders = allOrders.filter(o => o.status === 'Completed').length;
 
   const displayedOrders = isSearching ? searchResults : filteredOrders;
+
+  // Helper function to check if an order is from a teacher
+  const isTeacherOrder = (order) => {
+    return order.userType === 'teacher';
+  };
 
   return (
     <motion.div 
@@ -338,11 +364,23 @@ const AdminDashboard = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05, duration: 0.3 }}
-                  className="grid grid-cols-12 items-center text-sm border-b py-3 hover:bg-gray-50 text-[#2c2c5b]"
+                  className={`grid grid-cols-12 items-center text-sm border-b py-3 hover:bg-gray-50 text-[#2c2c5b] ${
+                    isTeacherOrder(order) ? 'bg-green-50 border-l-4 border-l-green-400' : ''
+                  }`}
                 >
-                  <span className="col-span-1 text-[#fec723] font-semibold">{order.orderNumber}</span>
+                  <span className="col-span-1 text-[#fec723] font-semibold flex items-center">
+                    {isTeacherOrder(order) && <FiStar className="text-green-500 mr-1" />}
+                    {order.orderNumber}
+                  </span>
                   <div className="col-span-2">
-                    <p>{order.customerName}</p>
+                    <p className="flex items-center">
+                      {order.customerName}
+                      {isTeacherOrder(order) && (
+                        <span className="ml-2 px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-700 rounded-full">
+                          Teacher
+                        </span>
+                      )}
+                    </p>
                     <p className="text-xs text-[#a3a3b2]">{order.customerEmail}</p>
                     <p className="text-xs text-[#a3a3b2]">{new Date(order.createdAt).toLocaleString()}</p>
                   </div>
@@ -412,10 +450,17 @@ const AdminDashboard = () => {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.05, duration: 0.3 }}
-                  className="border rounded-lg overflow-hidden shadow-sm"
+                  className={`border rounded-lg overflow-hidden shadow-sm ${
+                    isTeacherOrder(order) ? 'border-l-4 border-l-amber-400' : ''
+                  }`}
                 >
-                  <div className="bg-gray-50 p-3 border-b flex justify-between items-center">
-                    <span className="text-[#fec723] font-semibold">{order.orderNumber}</span>
+                  <div className={`p-3 border-b flex justify-between items-center ${
+                    isTeacherOrder(order) ? 'bg-amber-50' : 'bg-gray-50'
+                  }`}>
+                    <span className="text-[#fec723] font-semibold flex items-center">
+                      {isTeacherOrder(order) && <FiStar className="text-amber-500 mr-1" />}
+                      {order.orderNumber}
+                    </span>
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                       {getStatusIcon(order.status)}
                       <span className="ml-1">{order.status}</span>
@@ -424,7 +469,14 @@ const AdminDashboard = () => {
                   
                   <div className="p-3">
                     <div className="mb-2">
-                      <p className="font-medium">{order.customerName}</p>
+                      <p className="font-medium flex items-center">
+                        {order.customerName}
+                        {isTeacherOrder(order) && (
+                          <span className="ml-2 px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 rounded-full">
+                            Teacher
+                          </span>
+                        )}
+                      </p>
                       <p className="text-xs text-[#a3a3b2]">{order.customerEmail}</p>
                       <p className="text-xs text-[#a3a3b2]">{new Date(order.createdAt).toLocaleString()}</p>
                     </div>

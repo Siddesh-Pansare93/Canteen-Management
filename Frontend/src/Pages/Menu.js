@@ -1,14 +1,16 @@
 import React, { useState } from "react";
-import MenuItems from "../Components/MenuItems";
+import { useMenuItems } from "../Components/MenuItems";
 import { useCart } from "../context/CartContext";
 import { toast } from "react-toastify";
 
-const categories = ["All", ...new Set(MenuItems.map((item) => item.category))];
-
 export default function Menu() {
+    const { menuItems } = useMenuItems();
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [searchTerm, setSearchTerm] = useState("");
     const [sortOption, setSortOption] = useState("default");
+    
+    // Get unique categories from current menu items
+    const categories = ["All", ...new Set(menuItems.map((item) => item.category))];
     
     // Use the cart context
     const { addToCart } = useCart();
@@ -18,7 +20,7 @@ export default function Menu() {
         toast.success(`Added ${item.name} to cart!`);
     };
 
-    const filteredItems = MenuItems
+    const filteredItems = menuItems
         .filter((item) =>
             selectedCategory === "All" ? true : item.category === selectedCategory
         )

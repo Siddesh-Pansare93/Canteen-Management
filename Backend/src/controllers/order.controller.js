@@ -32,6 +32,11 @@ export const createOrder = async (req, res) => {
       });
     }
     
+    // Ensure userType is set before saving
+    if (!user.userType) {
+      user.userType = 'student'; // Default to 'student' if not set
+    }
+    
     // Deduct the amount from user's wallet
     user.walletBalance -= totalAmount;
     await user.save();
